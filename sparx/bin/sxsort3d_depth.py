@@ -3324,25 +3324,46 @@ def compute_rand_index_mpi(inassign1, inassign2):
 	return float(nomin)/num_all_pairs
 	
 def isin(element, test_elements, assume_unique=False, invert=False):
-    import numpy as np
-    element = np.asarray(element)
-    return np.in1d(element, test_elements, assume_unique=assume_unique, \
-        invert=invert).reshape(element.shape)
+	import numpy as np
+	element = np.asarray(element)
+	return np.in1d(
+		element,
+		test_elements,
+		assume_unique=assume_unique,
+		invert=invert
+		).reshape(element.shape)
 
 def split_partition_into_ordered_clusters_split_ucluster(partition, input_row_wise = True):
 	# group particles  by their cluster ids; take the last one as unaccounted group
 	import numpy as np
 	clusters   = []
-	if input_row_wise: partition = np.array(partition, dtype=np.int32).transpose()
+	partition = np.array(partition, dtype=np.int32)
+	if input_row_wise:
+		partition = partition.transpose()
 	group_id = np.sort(np.unique(partition[0]))
-	if group_id.shape[0] >1: 
+	if group_id.shape[0] > 1: 
 		for icluster in range(group_id.shape[0]):
-			if icluster <group_id.shape[0] -1: clusters.append((np.sort(partition[1][isin(partition[0],\
-			     group_id[icluster])])).tolist())
-			else:  ucluster =(np.sort(partition[1][isin(partition[0], group_id[icluster])])).tolist()
+			if icluster < group_id.shape[0] - 1:
+				clusters.append(
+					np.sort(
+						partition[1][
+							isin(partition[0], group_id[icluster])
+							]
+						).tolist()
+					)
+			else:
+				ucluster = np.sort(
+					partition[1][
+						isin(
+							partition[0],
+							group_id[icluster]
+							)
+						]
+					).tolist()
 		return clusters, ucluster
-	else: return [partition[1].tolist()], []
-                           
+	else:
+		return [partition[1].tolist()], []
+
 def split_partition_into_ordered_clusters(partition, input_is_row_wise = True):
 	# partition column 0 cluster  IDs
 	# partition column 1 particle IDs
